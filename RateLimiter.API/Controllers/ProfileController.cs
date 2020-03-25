@@ -18,8 +18,9 @@ namespace RateLimiter.API.Controllers
             _logger = logger;
         }
 
+        [TimespanBetweenRequests(5000)]
         [HttpGet]
-        public async Task<string> Get()
+        public async Task<string> Get(string authToken)
         {
             return "Anshul";
         }
