@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Runtime.Caching;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
-namespace RateLimiter
+namespace RateLimiter.Core
 {
     public class RequestsPerTimespanRule : IRule
     {
@@ -17,10 +18,10 @@ namespace RateLimiter
         public int Seconds { get; set; }
 
         private static ConcurrentDictionary<string, int> RequestBuckets { get; } = new ConcurrentDictionary<string, int>();
-        
+
         private static string CacheIdentifier { get; } = nameof(RequestsPerTimespanRule);
 
-        private static MemoryCache RequestTimers { get; } = new MemoryCache(CacheIdentifier);
+        private static MemoryCache RequestTimers { get; } = new MemoryCache(new MemoryCacheOptions());
 
         public bool AllowExecution(string authToken)
         {
@@ -45,18 +46,24 @@ namespace RateLimiter
         private void IncrementRequestBucket(string key, int activeRequests)
         {
             RequestBuckets[key] = activeRequests + 1;
-            RequestTimers.Set(Guid.NewGuid().ToString(), key, new CacheItemPolicy()
+            RequestTimers.Set(Guid.NewGuid().ToString(), key, new MemoryCacheEntryOptions()
             {
-                AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(Seconds),
-                RemovedCallback = arguments =>
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(Seconds),
+                PostEvictionCallbacks =
                 {
-                    if (RequestBuckets[key] <= 1)
+                    new PostEvictionCallbackRegistration()
                     {
-                        RequestBuckets.TryRemove(key, out var value);
-                    }
-                    else
-                    {
-                        RequestBuckets[key]--;
+                        EvictionCallback = (o, v, r, s) =>
+                        {
+                            if (RequestBuckets[key] <= 1)
+                            {
+                                RequestBuckets.TryRemove(key, out var value);
+                            }
+                            else
+                            {
+                                RequestBuckets[key]--;
+                            }
+                        }
                     }
                 }
             });

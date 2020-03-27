@@ -1,37 +1,15 @@
 ﻿using System;
-using System.Net;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
+using RateLimiter.Core;
 
 namespace RateLimiter.API
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class TimespanBetweenRequestsAttribute : ActionFilterAttribute
+    public class TimespanBetweenRequestsAttribute : RateLimiterAttributeBase
     {
-        private TimespanBetweenRequestsRule Rule { get; }
-
         public TimespanBetweenRequestsAttribute(int ms)
         {
             Rule = new TimespanBetweenRequestsRule(ms);
-        }
-        
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
-            if (!context.ActionArguments.TryGetValue("AuthToken", out object authToken))
-            {
-                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return;
-            }
-
-            if (!Rule.AllowExecution((string) authToken))
-            {
-                context.Result = new ContentResult
-                {
-                    Content = "Too many requests. Try again later."
-                };
-
-                context.HttpContext.Response.StatusCode = (int) HttpStatusCode.TooManyRequests;
-            }
+            ExceptionMessage = $"There needs to be {ms} seconds between subsequent requests.";
         }
     }
 }
