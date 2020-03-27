@@ -192,6 +192,7 @@
   <ItemGroup>
     <Compile Include="IRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequestsPerTimespanRule.cs" />
     <Compile Include="TimespanBetweenRequestsRule.cs" />
   </ItemGroup>
   <ItemGroup>

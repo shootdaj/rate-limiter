@@ -20,9 +20,18 @@ namespace RateLimiter.API.Controllers
 
         [TimespanBetweenRequests(5000)]
         [HttpGet]
-        public async Task<string> Get(string authToken)
+        [Route("name")]
+        public async Task<string> GetName(string authToken)
         {
             return "Anshul";
+        }
+
+        [TimespanBetweenRequests(5000)]
+        [HttpGet]
+        [Route("age")]
+        public async Task<int> GetAge(string authToken)
+        {
+            return 32;
         }
     }
 }

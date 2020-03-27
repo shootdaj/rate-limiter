@@ -17,20 +17,21 @@ namespace RateLimiter.API
         
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (context.ActionArguments.TryGetValue("AuthToken", out object authToken))
+            if (!context.ActionArguments.TryGetValue("AuthToken", out object authToken))
             {
-                if (!Rule.AllowExecution((string)authToken))
-                {
-                    context.Result = new ContentResult
-                    {
-                        Content = "Too many requests. Try again later."
-                    };
-
-                    context.HttpContext.Response.StatusCode = (int) HttpStatusCode.TooManyRequests;
-                }
+                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return;
             }
 
-            base.OnActionExecuting(context);
+            if (!Rule.AllowExecution((string) authToken))
+            {
+                context.Result = new ContentResult
+                {
+                    Content = "Too many requests. Try again later."
+                };
+
+                context.HttpContext.Response.StatusCode = (int) HttpStatusCode.TooManyRequests;
+            }
         }
     }
 }
