@@ -12,11 +12,5 @@
     <ProjectReference Include="..\RateLimiter.Core\RateLimiter.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="RateLimiter">
-      <HintPath>..\RateLimiter\bin\Debug\RateLimiter.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 
 </Project>

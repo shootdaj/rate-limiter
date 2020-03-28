@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using RateLimiter.API.ActionFilters;
 
 namespace RateLimiter.API.Controllers
 {
@@ -18,7 +19,7 @@ namespace RateLimiter.API.Controllers
             _logger = logger;
         }
 
-        [TimespanBetweenRequests(5000)]
+        [TimespanBetweenRequests(500)]
         [HttpGet]
         [Route("name")]
         public async Task<string> GetName(string authToken)
@@ -26,12 +27,20 @@ namespace RateLimiter.API.Controllers
             return "Anshul";
         }
 
-        [RequestsPerTimespan(1, 10000)]
+        [RequestsPerTimespan(5, 30)]
         [HttpGet]
         [Route("age")]
         public async Task<int> GetAge(string authToken)
         {
             return 32;
+        }
+
+        [GeographicMux(2000, 4, 10)]
+        [HttpGet]
+        [Route("city")]
+        public async Task<string> GetCity(string authToken)
+        {
+            return "Los Angeles, CA";
         }
     }
 }

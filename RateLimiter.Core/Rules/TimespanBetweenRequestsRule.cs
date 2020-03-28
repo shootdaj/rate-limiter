@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace RateLimiter
+namespace RateLimiter.Core.Rules
 {
     public class TimespanBetweenRequestsRule : IRule
     {
@@ -31,6 +31,11 @@ namespace RateLimiter
             Cache.Set(key, true, cacheEntryOptions);
 
             return true;
+        }
+
+        public string GetNotAllowedReason(string authToken)
+        {
+            return $"There needs to be {Milliseconds} millisecond(s) between subsequent requests. Please try again later.";
         }
     }
 }
