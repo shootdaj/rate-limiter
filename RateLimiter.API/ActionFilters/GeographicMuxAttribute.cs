@@ -8,11 +8,13 @@ namespace RateLimiter.API.ActionFilters
     public class GeographicMuxAttribute : RateLimiterAttributeBase
     {
         public GeographicMuxAttribute(
+            string sourceIdentifier,
             int timespanBetweenRequestsMs,
             int requestsPerTimespanMaxRequestCount,
             int requestsPerTimespanSeconds)
         {
             Rule = new GeographicMuxRule(
+                sourceIdentifier,
                 timespanBetweenRequestsMs, 
                 requestsPerTimespanMaxRequestCount,
                 requestsPerTimespanSeconds);

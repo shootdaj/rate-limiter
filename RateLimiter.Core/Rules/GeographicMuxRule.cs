@@ -5,14 +5,18 @@ namespace RateLimiter.Core.Rules
     public class GeographicMuxRule : IRule
     {
         public GeographicMuxRule(
+            string timespanBetweenRequestSourceIdentifier,
             int timespanBetweenRequestsMs,
             int requestsPerTimespanMaxRequestCount,
             int requestsPerTimespanSeconds)
         {
+            TimespanPerRequestsSourceIdentifier = timespanBetweenRequestSourceIdentifier;
             RequestsPerTimespanMaxRequestCount = requestsPerTimespanMaxRequestCount;
             RequestsPerTimespanSeconds = requestsPerTimespanSeconds;
             TimespanBetweenRequestsMS = timespanBetweenRequestsMs;
         }
+
+        private string TimespanPerRequestsSourceIdentifier { get; }
 
         private int RequestsPerTimespanMaxRequestCount { get; }
 
@@ -34,7 +38,7 @@ namespace RateLimiter.Core.Rules
             }
             else if (authToken.StartsWith(EU))
             {
-                return new TimespanBetweenRequestsRule(TimespanBetweenRequestsMS).AllowExecution(authToken);
+                return new TimespanBetweenRequestsRule(TimespanPerRequestsSourceIdentifier, TimespanBetweenRequestsMS).AllowExecution(authToken);
             }
 
             throw new ArgumentException(TokenErrorMessage);
@@ -49,7 +53,7 @@ namespace RateLimiter.Core.Rules
             }
             else if (authToken.StartsWith(EU))
             {
-                return new TimespanBetweenRequestsRule(TimespanBetweenRequestsMS).GetNotAllowedReason(authToken);
+                return new TimespanBetweenRequestsRule(TimespanPerRequestsSourceIdentifier, TimespanBetweenRequestsMS).GetNotAllowedReason(authToken);
             }
 
             throw new ArgumentException(TokenErrorMessage);

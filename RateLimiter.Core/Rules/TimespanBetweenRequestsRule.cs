@@ -5,8 +5,9 @@ namespace RateLimiter.Core.Rules
 {
     public class TimespanBetweenRequestsRule : IRule
     {
-        public TimespanBetweenRequestsRule(int ms)
+        public TimespanBetweenRequestsRule(string sourceIdentifier, int ms)
         {
+            SourceIdentifier = sourceIdentifier;
             Milliseconds = ms;
         }
 
@@ -14,11 +15,13 @@ namespace RateLimiter.Core.Rules
 
         private static MemoryCache Cache { get; } = new MemoryCache(new MemoryCacheOptions());
 
-        private static string CacheIdentifier { get; } = nameof(TimespanBetweenRequestsRule);
+        private string CacheIdentifier { get; } = nameof(TimespanBetweenRequestsRule);
+
+        private string SourceIdentifier { get; }
 
         public bool AllowExecution(string authToken)
         {
-            var key = $"{CacheIdentifier}:{authToken}";
+            var key = $"{CacheIdentifier}:{SourceIdentifier}:{authToken}";
 
             if (Cache.TryGetValue(key, out bool value))
             {

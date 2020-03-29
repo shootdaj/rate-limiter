@@ -19,7 +19,7 @@ namespace RateLimiter.API.Controllers
             _logger = logger;
         }
 
-        [TimespanBetweenRequests(500)]
+        [TimespanBetweenRequests("profile:name", 500)]
         [HttpGet]
         [Route("name")]
         public async Task<string> GetName(string authToken)
@@ -35,7 +35,7 @@ namespace RateLimiter.API.Controllers
             return 32;
         }
 
-        [GeographicMux(2000, 4, 10)]
+        [GeographicMux("profile:city", 2000, 4, 10)]
         [HttpGet]
         [Route("city")]
         public async Task<string> GetCity(string authToken)
