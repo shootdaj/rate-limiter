@@ -20,9 +20,11 @@ namespace RateLimiter.Core.Rules
 
         private int TimespanBetweenRequestsMS { get; }
 
-        public static string US = "US";
+        private readonly string TokenErrorMessage = $"Auth token must begin with '{US}' or '{EU}'.";
 
-        public static string EU = "EU";
+        public static readonly string US = "US";
+
+        public static readonly string EU = "EU";
 
         public bool AllowExecution(string authToken)
         {
@@ -35,7 +37,7 @@ namespace RateLimiter.Core.Rules
                 return new TimespanBetweenRequestsRule(TimespanBetweenRequestsMS).AllowExecution(authToken);
             }
 
-            throw new ArgumentException($"Auth token must begin with '{US}' or '{EU}'.");
+            throw new ArgumentException(TokenErrorMessage);
         }
 
         public string GetNotAllowedReason(string authToken)
@@ -50,7 +52,7 @@ namespace RateLimiter.Core.Rules
                 return new TimespanBetweenRequestsRule(TimespanBetweenRequestsMS).GetNotAllowedReason(authToken);
             }
 
-            throw new ArgumentException($"Auth token must begin with '{US}' or '{EU}'");
+            throw new ArgumentException(TokenErrorMessage);
         }
     }
 }
