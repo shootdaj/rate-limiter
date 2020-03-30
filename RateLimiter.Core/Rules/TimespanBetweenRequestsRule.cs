@@ -7,6 +7,11 @@ namespace RateLimiter.Core.Rules
     {
         public TimespanBetweenRequestsRule(string sourceIdentifier, int ms)
         {
+            if (string.IsNullOrEmpty(sourceIdentifier))
+            {
+                throw new ArgumentException($"{nameof(sourceIdentifier)} must be provided.");
+            }
+
             SourceIdentifier = sourceIdentifier;
             Milliseconds = ms;
         }
@@ -21,6 +26,11 @@ namespace RateLimiter.Core.Rules
 
         public bool AllowExecution(string authToken)
         {
+            if (string.IsNullOrEmpty(authToken))
+            {
+                throw new ArgumentException("Auth token must be provided.");
+            }
+
             var key = $"{CacheIdentifier}:{SourceIdentifier}:{authToken}";
 
             if (Cache.TryGetValue(key, out bool value))

@@ -9,9 +9,31 @@ namespace RateLimiter.Core.Tests
 {
     public class TimespanBetweenRequestsRuleTests
     {
+        [InlineData("")]
+        [InlineData(null)]
+        [Theory]
+        public void Ctor_ThrowsOnInvalidIdentifier(string identifier)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new TimespanBetweenRequestsRule(identifier, 1);
+            });
+        }
+
+        [InlineData("")]
+        [InlineData(null)]
+        [Theory]
+        public void AllowsExecution_ThrowsOnInvalidAuthToken(string authToken)
+        {
+            Assert.Throws<ArgumentException>(() =>
+                {
+                    new TimespanBetweenRequestsRule("test", 1).AllowExecution(authToken);
+                });
+        }
+
         [ClassData(typeof(AllowExecutionTestData))]
         [Theory]
-        public async Task AllowExecution_Works(int ms, TimespanBetweenRequestTimeline[] timeline)
+        public async Task AllowExecution_HappyPath(int ms, RequestTimeline[] timeline)
         {
             var sourceIdentifier = Guid.NewGuid().ToString();
             var timespanBetweenRequestsRule = new TimespanBetweenRequestsRule(sourceIdentifier, ms);
@@ -24,90 +46,77 @@ namespace RateLimiter.Core.Tests
                 Assert.Equal(request.Expected, actual);
             }
         }
-    }
 
-    class AllowExecutionTestData : IEnumerable<object[]>
-    {
-        public IEnumerator<object[]> GetEnumerator()
+        class AllowExecutionTestData : IEnumerable<object[]>
         {
-            yield return new object[]
+            public IEnumerator<object[]> GetEnumerator()
             {
+                yield return new object[]
+                {
                 1000,
                 new[]
                 {
-                    new TimespanBetweenRequestTimeline(0, true, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(100, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(400, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(300, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(600, true, "AuthToken"),
+                    new RequestTimeline(0, true, "AuthToken"),
+                    new RequestTimeline(100, false, "AuthToken"),
+                    new RequestTimeline(400, false, "AuthToken"),
+                    new RequestTimeline(300, false, "AuthToken"),
+                    new RequestTimeline(600, true, "AuthToken"),
                 }
-            };
+                };
 
-            yield return new object[]
-            {
+                yield return new object[]
+                {
                 500,
                 new[]
                 {
-                    new TimespanBetweenRequestTimeline(0, true, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(100, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(200, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(100, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(200, true, "AuthToken"),
+                    new RequestTimeline(0, true, "AuthToken"),
+                    new RequestTimeline(100, false, "AuthToken"),
+                    new RequestTimeline(200, false, "AuthToken"),
+                    new RequestTimeline(100, false, "AuthToken"),
+                    new RequestTimeline(200, true, "AuthToken"),
                 }
-            };
+                };
 
-            yield return new object[]
-            {
+                yield return new object[]
+                {
                 100,
                 new[]
                 {
-                    new TimespanBetweenRequestTimeline(0, true, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(50, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(10, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(10, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(40, true, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(50, false, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(60, true, "AuthToken"),
+                    new RequestTimeline(0, true, "AuthToken"),
+                    new RequestTimeline(50, false, "AuthToken"),
+                    new RequestTimeline(10, false, "AuthToken"),
+                    new RequestTimeline(10, false, "AuthToken"),
+                    new RequestTimeline(40, true, "AuthToken"),
+                    new RequestTimeline(50, false, "AuthToken"),
+                    new RequestTimeline(60, true, "AuthToken"),
                 }
-            };
+                };
 
-            yield return new object[]
-            {
+                yield return new object[]
+                {
                 1000,
                 new[]
                 {
-                    new TimespanBetweenRequestTimeline(0, true, "AuthToken"),
-                    new TimespanBetweenRequestTimeline(500, false, "AuthToken"), //50
-                    new TimespanBetweenRequestTimeline(100, true, "AuthToken2"), //60
-                    new TimespanBetweenRequestTimeline(100, false, "AuthToken"), //70
-                    new TimespanBetweenRequestTimeline(100, false, "AuthToken2"), //80
-                    new TimespanBetweenRequestTimeline(100, false, "AuthToken"), //90
-                    new TimespanBetweenRequestTimeline(200, true, "AuthToken"), //110
-                    new TimespanBetweenRequestTimeline(100, false, "AuthToken2"), //120
-                    new TimespanBetweenRequestTimeline(500, false, "AuthToken"), //170
-                    new TimespanBetweenRequestTimeline(100, true, "AuthToken2"), //180
-                    new TimespanBetweenRequestTimeline(600, true, "AuthToken"), //240
+                    new RequestTimeline(0, true, "AuthToken"),
+                    new RequestTimeline(500, false, "AuthToken"), //50
+                    new RequestTimeline(100, true, "AuthToken2"), //60
+                    new RequestTimeline(100, false, "AuthToken"), //70
+                    new RequestTimeline(100, false, "AuthToken2"), //80
+                    new RequestTimeline(100, false, "AuthToken"), //90
+                    new RequestTimeline(200, true, "AuthToken"), //110
+                    new RequestTimeline(100, false, "AuthToken2"), //120
+                    new RequestTimeline(500, false, "AuthToken"), //170
+                    new RequestTimeline(100, true, "AuthToken2"), //180
+                    new RequestTimeline(600, true, "AuthToken"), //240
                 }
-            };
-        }
+                };
+            }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
         }
     }
 
-    public class TimespanBetweenRequestTimeline
-    {
-        public TimespanBetweenRequestTimeline(int delayMS, bool expected, string authToken)
-        {
-            DelayMS = delayMS;
-            Expected = expected;
-            AuthToken = authToken;
-        }
-
-        public string AuthToken { get; }
-        public int DelayMS { get; }
-        public bool Expected { get; }
-    }
 }

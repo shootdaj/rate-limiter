@@ -7,8 +7,14 @@ namespace RateLimiter.Core.Rules
 {
     public class RequestsPerTimespanRule : IRule
     {
-        public RequestsPerTimespanRule(int maxRequestCount, int seconds)
+        public RequestsPerTimespanRule(string sourceIdentifier, int maxRequestCount, int seconds)
         {
+            if (string.IsNullOrEmpty(sourceIdentifier))
+            {
+                throw new ArgumentException($"{nameof(sourceIdentifier)} must be provided.");
+            }
+
+            SourceIdentifier = sourceIdentifier;
             MaxRequestCount = maxRequestCount;
             Seconds = seconds;
         }
@@ -23,9 +29,16 @@ namespace RateLimiter.Core.Rules
 
         private static Dictionary<string, Timer> RequestTimers { get; } = new Dictionary<string, Timer>();
 
+        private string SourceIdentifier { get; }
+
         public bool AllowExecution(string authToken)
         {
-            var key = $"{CacheIdentifier}:{authToken}";
+            if (string.IsNullOrEmpty(authToken))
+            {
+                throw new ArgumentException("Auth token must be provided.");
+            }
+
+            var key = $"{CacheIdentifier}:{SourceIdentifier}:{authToken}";
 
             if (RequestBuckets.TryGetValue(key, out var activeRequests))
             {

@@ -27,7 +27,7 @@ namespace RateLimiter.API.Controllers
             return "Anshul";
         }
 
-        [RequestsPerTimespan(5, 30)]
+        [RequestsPerTimespan("profile:age", 5, 30)]
         [HttpGet]
         [Route("age")]
         public async Task<int> GetAge(string authToken)

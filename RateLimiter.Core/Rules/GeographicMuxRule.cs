@@ -5,18 +5,23 @@ namespace RateLimiter.Core.Rules
     public class GeographicMuxRule : IRule
     {
         public GeographicMuxRule(
-            string timespanBetweenRequestSourceIdentifier,
+            string sourceIdentifier,
             int timespanBetweenRequestsMs,
             int requestsPerTimespanMaxRequestCount,
             int requestsPerTimespanSeconds)
         {
-            TimespanPerRequestsSourceIdentifier = timespanBetweenRequestSourceIdentifier;
+            if (string.IsNullOrEmpty(sourceIdentifier))
+            {
+                throw new ArgumentException($"{nameof(sourceIdentifier)} must be provided.");
+            }
+
+            SourceIdentifier = sourceIdentifier;
             RequestsPerTimespanMaxRequestCount = requestsPerTimespanMaxRequestCount;
             RequestsPerTimespanSeconds = requestsPerTimespanSeconds;
             TimespanBetweenRequestsMS = timespanBetweenRequestsMs;
         }
 
-        private string TimespanPerRequestsSourceIdentifier { get; }
+        private string SourceIdentifier { get; }
 
         private int RequestsPerTimespanMaxRequestCount { get; }
 
@@ -32,13 +37,18 @@ namespace RateLimiter.Core.Rules
 
         public bool AllowExecution(string authToken)
         {
+            if (string.IsNullOrEmpty(authToken))
+            {
+                throw new ArgumentException("Auth token must be provided.");
+            }
+
             if (authToken.StartsWith(US))
             {
-                return new RequestsPerTimespanRule(RequestsPerTimespanMaxRequestCount, RequestsPerTimespanSeconds).AllowExecution(authToken);
+                return new RequestsPerTimespanRule(SourceIdentifier, RequestsPerTimespanMaxRequestCount, RequestsPerTimespanSeconds).AllowExecution(authToken);
             }
             else if (authToken.StartsWith(EU))
             {
-                return new TimespanBetweenRequestsRule(TimespanPerRequestsSourceIdentifier, TimespanBetweenRequestsMS).AllowExecution(authToken);
+                return new TimespanBetweenRequestsRule(SourceIdentifier, TimespanBetweenRequestsMS).AllowExecution(authToken);
             }
 
             throw new ArgumentException(TokenErrorMessage);
@@ -46,14 +56,19 @@ namespace RateLimiter.Core.Rules
 
         public string GetNotAllowedReason(string authToken)
         {
+            if (string.IsNullOrEmpty(authToken))
+            {
+                throw new ArgumentException("Auth token must be provided.");
+            }
+
             if (authToken.StartsWith(US))
             {
-                return new RequestsPerTimespanRule(RequestsPerTimespanMaxRequestCount, RequestsPerTimespanSeconds)
+                return new RequestsPerTimespanRule(SourceIdentifier, RequestsPerTimespanMaxRequestCount, RequestsPerTimespanSeconds)
                     .GetNotAllowedReason(authToken);
             }
             else if (authToken.StartsWith(EU))
             {
-                return new TimespanBetweenRequestsRule(TimespanPerRequestsSourceIdentifier, TimespanBetweenRequestsMS).GetNotAllowedReason(authToken);
+                return new TimespanBetweenRequestsRule(SourceIdentifier, TimespanBetweenRequestsMS).GetNotAllowedReason(authToken);
             }
 
             throw new ArgumentException(TokenErrorMessage);
