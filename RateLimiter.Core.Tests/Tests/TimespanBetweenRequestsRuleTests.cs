@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using RateLimiter.Core.Rules;
 using Xunit;
 
-namespace RateLimiter.Core.Tests
+namespace RateLimiter.Core.Tests.Tests
 {
     public class TimespanBetweenRequestsRuleTests
     {
@@ -49,6 +49,8 @@ namespace RateLimiter.Core.Tests
 
         class AllowExecutionTestData : IEnumerable<object[]>
         {
+            private const string AuthToken = "AuthToken";
+
             public IEnumerator<object[]> GetEnumerator()
             {
                 yield return new object[]
@@ -56,11 +58,11 @@ namespace RateLimiter.Core.Tests
                 1000,
                 new[]
                 {
-                    new RequestTimeline(0, true, "AuthToken"),
-                    new RequestTimeline(100, false, "AuthToken"),
-                    new RequestTimeline(400, false, "AuthToken"),
-                    new RequestTimeline(300, false, "AuthToken"),
-                    new RequestTimeline(600, true, "AuthToken"),
+                    new RequestTimeline(0, true, AuthToken),
+                    new RequestTimeline(100, false, AuthToken),
+                    new RequestTimeline(400, false, AuthToken),
+                    new RequestTimeline(300, false, AuthToken),
+                    new RequestTimeline(600, true, AuthToken),
                 }
                 };
 
@@ -69,11 +71,11 @@ namespace RateLimiter.Core.Tests
                 500,
                 new[]
                 {
-                    new RequestTimeline(0, true, "AuthToken"),
-                    new RequestTimeline(100, false, "AuthToken"),
-                    new RequestTimeline(200, false, "AuthToken"),
-                    new RequestTimeline(100, false, "AuthToken"),
-                    new RequestTimeline(200, true, "AuthToken"),
+                    new RequestTimeline(0, true, AuthToken),
+                    new RequestTimeline(100, false, AuthToken),
+                    new RequestTimeline(200, false, AuthToken),
+                    new RequestTimeline(100, false, AuthToken),
+                    new RequestTimeline(200, true, AuthToken),
                 }
                 };
 
@@ -82,33 +84,33 @@ namespace RateLimiter.Core.Tests
                 100,
                 new[]
                 {
-                    new RequestTimeline(0, true, "AuthToken"),
-                    new RequestTimeline(50, false, "AuthToken"),
-                    new RequestTimeline(10, false, "AuthToken"),
-                    new RequestTimeline(10, false, "AuthToken"),
-                    new RequestTimeline(40, true, "AuthToken"),
-                    new RequestTimeline(50, false, "AuthToken"),
-                    new RequestTimeline(60, true, "AuthToken"),
+                    new RequestTimeline(0, true, AuthToken),
+                    new RequestTimeline(50, false, AuthToken),
+                    new RequestTimeline(10, false, AuthToken),
+                    new RequestTimeline(10, false, AuthToken),
+                    new RequestTimeline(40, true, AuthToken),
+                    new RequestTimeline(50, false, AuthToken),
+                    new RequestTimeline(60, true, AuthToken),
                 }
                 };
 
                 yield return new object[]
                 {
-                1000,
-                new[]
-                {
-                    new RequestTimeline(0, true, "AuthToken"),
-                    new RequestTimeline(500, false, "AuthToken"), //50
-                    new RequestTimeline(100, true, "AuthToken2"), //60
-                    new RequestTimeline(100, false, "AuthToken"), //70
-                    new RequestTimeline(100, false, "AuthToken2"), //80
-                    new RequestTimeline(100, false, "AuthToken"), //90
-                    new RequestTimeline(200, true, "AuthToken"), //110
-                    new RequestTimeline(100, false, "AuthToken2"), //120
-                    new RequestTimeline(500, false, "AuthToken"), //170
-                    new RequestTimeline(100, true, "AuthToken2"), //180
-                    new RequestTimeline(600, true, "AuthToken"), //240
-                }
+                    1000,
+                    new[]
+                    {
+                        new RequestTimeline(0, true, AuthToken),
+                        new RequestTimeline(500, false, AuthToken),
+                        new RequestTimeline(100, true, "AuthToken2"),
+                        new RequestTimeline(100, false, AuthToken),
+                        new RequestTimeline(100, false, "AuthToken2"),
+                        new RequestTimeline(100, false, AuthToken),
+                        new RequestTimeline(200, true, AuthToken),
+                        new RequestTimeline(100, false, "AuthToken2"),
+                        new RequestTimeline(500, false, AuthToken),
+                        new RequestTimeline(100, true, "AuthToken2"),
+                        new RequestTimeline(600, true, AuthToken),
+                    }
                 };
             }
 
